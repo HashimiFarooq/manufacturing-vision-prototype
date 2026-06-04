@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vision Dashboard — manufacturing-vision-prototype</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg-secondary: #f5f5f4;
+      --border: rgba(0,0,0,0.12);
+      --text: #1a1a18;
+      --text-muted: #6b6b67;
+      --text-faint: #a8a8a4;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --font-mono: 'Courier New', monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a18;
+        --bg-secondary: #242422;
+        --border: rgba(255,255,255,0.12);
+        --text: #f0f0ec;
+        --text-muted: #a0a09c;
+        --text-faint: #606060;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .shell {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-left h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    .tag {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      background: var(--bg);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 2px 8px;
+      color: var(--text-muted);
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #3B6D11;
+      display: inline-block;
+    }
+    .status-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .btn {
+      font-size: 13px;
+      padding: 5px 14px;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .btn:hover { background: var(--bg-secondary); }
+
+    /* Metric cards */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .metric-card {
+      background: var(--bg);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+    }
+    .metric-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .metric-value {
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    /* Feed card */
+    .card {
+      background: var(--bg);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .card-header {
+      padding: 11px 16px;
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .card-meta {
+      font-size: 11px;
+      color: var(--text-faint);
+      font-family: var(--font-mono);
+    }
+    .card-body { padding: 14px 16px; }
+
+    #feed-svg {
+      width: 100%;
+      display: block;
+      border-radius: 6px;
+      background: var(--bg-secondary);
+    }
+
+    /* Bottom grid */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 14px;
+    }
+
+    /* Detections table */
+    .det-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .det-table th {
+      text-align: left;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 10px 0 8px;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .det-table th.r, .det-table td.r { text-align: right; }
+    .det-table td {
+      font-size: 12px;
+      padding: 8px 0;
+      border-bottom: 0.5px solid var(--border);
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+    .det-table td.label-col { font-family: -apple-system, sans-serif; }
+    .det-table td.conf-col { color: var(--text); }
+
+    .badge {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 2px 8px;
+      border-radius: var(--radius-md);
+      display: inline-block;
+    }
+    .badge-bolt    { background: #FAEEDA; color: #854F0B; }
+    .badge-socket  { background: #E1F5EE; color: #0F6E56; }
+    .badge-component { background: #EEEDFE; color: #534AB7; }
+    @media (prefers-color-scheme: dark) {
+      .badge-bolt    { background: #633806; color: #FAC775; }
+      .badge-socket  { background: #085041; color: #9FE1CB; }
+      .badge-component { background: #3C3489; color: #CECBF6; }
+    }
+
+    .empty-row td {
+      text-align: center;
+      color: var(--text-faint);
+      padding: 24px 0 !important;
+      border-bottom: none !important;
+      font-family: -apple-system, sans-serif;
+    }
+
+    /* Log */
+    .log-inner {
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      height: 168px;
+      overflow-y: auto;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .log-entry { border-bottom: 0.5px solid var(--border); padding-bottom: 2px; margin-bottom: 2px; }
+    .log-ts { color: var(--text-faint); }
+
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+        <circle cx="12" cy="13" r="3"/>
+      </svg>
+      <h1>Vision dashboard</h1>
+      <span class="tag">manufacturing-vision-prototype</span>
+    </div>
+    <div class="header-right">
+      <span id="dot" class="status-dot"></span>
+      <span id="status-label" class="status-label">Live · simulated data</span>
+      <button id="play-btn" class="btn" onclick="toggleFeed()">⏸ Pause</button>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metrics">
+    <div class="metric-card">
+      <div class="metric-label">Objects detected</div>
+      <div id="m-obj" class="metric-value">—</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Frame</div>
+      <div id="m-frame" class="metric-value">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Avg. confidence</div>
+      <div id="m-conf" class="metric-value">—</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Model</div>
+      <div class="metric-value" style="font-size:16px;font-family:var(--font-mono);color:var(--text-muted);">YOLOv8</div>
+    </div>
+  </div>
+
+  <!-- Camera feed -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Camera feed</span>
+      <span class="card-meta">640 × 400 · PLACEHOLDER — replace with live video stream</span>
+    </div>
+    <div class="card-body">
+      <!--
+        INTEGRATION NOTE FOR HEITAN:
+        Replace this SVG with a live <video> or <canvas> element fed from your YOLO pipeline.
+        Detection data should come via WebSocket or polling endpoint:
+        Expected format: [{ label, confidence, x, y, w, h }, ...]
+        Update the renderDetections(data) function below with real data.
+      -->
+      <svg id="feed-svg" viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg">
+        <rect width="640" height="400" fill="var(--bg-secondary)" rx="6"/>
+        <g id="grid-g" opacity="0.2"></g>
+        <g id="boxes-g"></g>
+        <!-- Scan line animation -->
+        <rect x="0" width="640" height="1.5" fill="#1D9E75" opacity="0.5">
+          <animate attributeName="y" from="0" to="400" dur="3s" repeatCount="indefinite"/>
+        </rect>
+        <!-- Corner brackets -->
+        <g stroke="rgba(128,128,128,0.4)" stroke-width="1.5" fill="none">
+          <path d="M18 32 L18 18 L32 18"/>
+          <path d="M608 32 L608 18 L594 18"/>
+          <path d="M18 368 L18 382 L32 382"/>
+          <path d="M608 368 L608 382 L594 382"/>
+        </g>
+        <!-- Placeholder overlay -->
+        <g id="placeholder-g">
+          <text x="320" y="192" text-anchor="middle" font-size="14" font-family="-apple-system,sans-serif" fill="rgba(128,128,128,0.6)">Awaiting video input</text>
+          <text x="320" y="214" text-anchor="middle" font-size="12" font-family="-apple-system,sans-serif" fill="rgba(128,128,128,0.45)">Connect YOLO output to display live detections</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Detections + Log -->
+  <div class="bottom-grid">
+
+    <!-- Detections table -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Detections</span>
+      </div>
+      <div class="card-body">
+        <table class="det-table">
+          <thead><tr>
+            <th>Label</th>
+            <th class="r">Conf.</th>
+            <th class="r">X</th>
+            <th class="r">Y</th>
+            <th class="r">W × H</th>
+          </tr></thead>
+          <tbody id="det-tbody">
+            <tr class="empty-row"><td colspan="5">No detections yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Log -->
+    <div class="card">
+      <div class="card-header log-header">
+        <span class="card-title">Detection log</span>
+        <button class="btn" onclick="clearLog()" style="font-size:11px;padding:3px 10px;">Clear</button>
+      </div>
+      <div id="log-inner" class="log-inner"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ─── Sample detection sets (mimicking YOLO output format) ────────────────
+  // Replace this with real data from Heitan's pipeline via WebSocket or API
+  const DETECTION_SETS = [
+    [
+      { label: "bolt",      confidence: 0.94, x: 180, y: 140, w: 55, h: 55 },
+      { label: "bolt",      confidence: 0.87, x: 340, y: 220, w: 50, h: 52 },
+      { label: "socket",    confidence: 0.73, x: 480, y: 160, w: 70, h: 65 },
+    ],
+    [
+      { label: "bolt",      confidence: 0.96, x: 185, y: 138, w: 55, h: 55 },
+      { label: "bolt",      confidence: 0.91, x: 345, y: 225, w: 50, h: 52 },
+      { label: "socket",    confidence: 0.79, x: 476, y: 162, w: 70, h: 65 },
+      { label: "component", confidence: 0.65, x: 90,  y: 280, w: 100, h: 80 },
+    ],
+    [
+      { label: "bolt",      confidence: 0.95, x: 182, y: 142, w: 55, h: 55 },
+      { label: "bolt",      confidence: 0.88, x: 338, y: 218, w: 50, h: 52 },
+    ],
+  ];
+
+  // Bounding box stroke colors per label
+  const BOX_COLOR = {
+    bolt:      "#EF9F27",
+    socket:    "#1D9E75",
+    component: "#7F77DD",
+  };
+
+  // ─── State ───────────────────────────────────────────────────────────────
+  let frame = 0, setIndex = 0, isLive = true, ticker;
+
+  // ─── Utilities ───────────────────────────────────────────────────────────
+  function timestamp() {
+    return new Date().toTimeString().slice(0, 8);
+  }
+
+  function addLog(msg) {
+    const container = document.getElementById('log-inner');
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `<span class="log-ts">[${timestamp()}]</span> ${msg}`;
+    container.insertBefore(entry, container.firstChild);
+    while (container.children.length > 50) container.removeChild(container.lastChild);
+  }
+
+  function clearLog() {
+    document.getElementById('log-inner').innerHTML =
+      '<div class="log-entry" style="color:var(--text-faint)">Log cleared.</div>';
+  }
+
+  // ─── Draw grid on SVG ─────────────────────────────────────────────────────
+  function drawGrid() {
+    const g = document.getElementById('grid-g');
+    let html = '';
+    for (let x = 80; x < 640; x += 80)
+      html += `<line x1="${x}" y1="0" x2="${x}" y2="400" stroke="rgba(128,128,128,0.3)" stroke-width="0.5"/>`;
+    for (let y = 80; y < 400; y += 80)
+      html += `<line x1="0" y1="${y}" x2="640" y2="${y}" stroke="rgba(128,128,128,0.3)" stroke-width="0.5"/>`;
+    g.innerHTML = html;
+  }
+
+  // ─── Render detections ────────────────────────────────────────────────────
+  // This is the function to call with real YOLO data:
+  // renderDetections([{ label, confidence, x, y, w, h }, ...])
+  function renderDetections(detections) {
+
+    // Hide placeholder
+    document.getElementById('placeholder-g').style.display = 'none';
+
+    // Draw bounding boxes in SVG
+    const boxLayer = document.getElementById('boxes-g');
+    let svg = '';
+    detections.forEach(d => {
+      const color = BOX_COLOR[d.label] || '#888888';
+      const pct   = Math.round(d.confidence * 100);
+      const lbl   = `${d.label} ${pct}%`;
+      const labelW = lbl.length * 7 + 8;
+      const cx    = d.x + Math.floor(d.w / 2);
+
+      svg += `
+        <rect x="${d.x}" y="${d.y}" width="${d.w}" height="${d.h}"
+              fill="none" stroke="${color}" stroke-width="1.5" rx="2"/>
+        <rect x="${d.x}" y="${d.y - 18}" width="${labelW}" height="18"
+              fill="${color}" rx="2"/>
+        <text x="${d.x + 4}" y="${d.y - 5}"
+              fill="white" font-size="11" font-family="monospace" font-weight="600">
+          ${lbl}
+        </text>
+        <text x="${cx}" y="${d.y + d.h + 16}"
+              text-anchor="middle" fill="${color}" font-size="10" font-family="monospace">
+          (${d.x}, ${d.y})
+        </text>
+      `;
+    });
+    boxLayer.innerHTML = svg;
+
+    // Update metric cards
+    document.getElementById('m-obj').textContent   = detections.length;
+    document.getElementById('m-frame').textContent = frame;
+    if (detections.length > 0) {
+      const avg = detections.reduce((s, d) => s + d.confidence, 0) / detections.length;
+      document.getElementById('m-conf').textContent = Math.round(avg * 100) + '%';
+    }
+
+    // Update detections table
+    const tbody = document.getElementById('det-tbody');
+    if (detections.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No detections yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = detections.map(d => `
+      <tr>
+        <td class="label-col">
+          <span class="badge badge-${d.label}">${d.label}</span>
+        </td>
+        <td class="r conf-col">${Math.round(d.confidence * 100)}%</td>
+        <td class="r">${d.x}</td>
+        <td class="r">${d.y}</td>
+        <td class="r">${d.w} × ${d.h}</td>
+      </tr>
+    `).join('');
+  }
+
+  // ─── Simulation tick (remove when using real data) ────────────────────────
+  function tick() {
+    const detections = DETECTION_SETS[setIndex % DETECTION_SETS.length];
+    setIndex++;
+    renderDetections(detections);
+    addLog(`Frame ${frame}: detected [${detections.map(d => d.label).join(', ')}]`);
+    frame++;
+  }
+
+  // ─── Play / Pause ─────────────────────────────────────────────────────────
+  function toggleFeed() {
+    isLive = !isLive;
+    const btn    = document.getElementById('play-btn');
+    const dot    = document.getElementById('dot');
+    const label  = document.getElementById('status-label');
+    if (isLive) {
+      btn.textContent        = '⏸ Pause';
+      dot.style.background   = '#3B6D11';
+      label.textContent      = 'Live · simulated data';
+      ticker = setInterval(tick, 2000);
+      addLog('Feed resumed');
+    } else {
+      btn.textContent        = '▶ Resume';
+      dot.style.background   = '#BA7517';
+      label.textContent      = 'Paused';
+      clearInterval(ticker);
+      addLog('Feed paused');
+    }
+  }
+
+  // ─── Init ─────────────────────────────────────────────────────────────────
+  drawGrid();
+  addLog('Dashboard initialized');
+  addLog('Sample data: bolt detection mode');
+  addLog('TODO: connect Heitan YOLO output → call renderDetections(data)');
+  tick();
+  ticker = setInterval(tick, 2000);
+</script>
+</body>
+</html>
