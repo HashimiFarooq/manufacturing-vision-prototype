@@ -1,21 +1,24 @@
+import time
 import cv2
-from app.state.shared import latest_frame
+import app.state.shared as shared
 
 def generate_frames():
     while True:
-        if latest_frame is None:
+
+        if shared.latest_frame is None:
+            time.sleep(0.01)
             continue
 
-        # encode frame as JPEG
-        success, buffer = cv2.imencode('.jpg', latest_frame)
+        frame = shared.latest_frame.copy()
+
+        success, buffer = cv2.imencode(".jpg", frame)
+
         if not success:
             continue
 
-        frame = buffer.tobytes()
-
         yield (
-            b'--frame\r\n'
-            b'Content-Type: image/jpeg\r\n\r\n' +
-            frame +
-            b'\r\n'
+            b"--frame\r\n"
+            b"Content-Type: image/jpeg\r\n\r\n"
+            + buffer.tobytes()
+            + b"\r\n"
         )

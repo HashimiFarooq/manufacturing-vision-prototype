@@ -2,10 +2,10 @@ import cv2
 from ultralytics import YOLO
 from app.vision.detector import run_inference
 from app.vision.processor import extract_detections
-from app.state.shared import latest_detections, latest_frame
+import app.state.shared as shared
+from app.models.registry import get_model
 
-model = YOLO("models/yolo11n.pt")
-
+model = get_model()
 
 def start_camera():
     # Open camera
@@ -23,8 +23,8 @@ def start_camera():
 
         # ---- DRAWING LAYER (camera.py responsibility) ----
         annotated_frame = results[0].plot()
-
-        for d in detections:
+        
+        for d in detections["objects"]:
             cx, cy = d["center_pixel"]
 
             cv2.circle(
@@ -46,8 +46,8 @@ def start_camera():
             )
 
         # ---- UPDATE SHARED STATE ----
-        latest_detections.clear()
-        latest_detections.extend(detections)
-
-        global latest_frame
-        latest_frame = annotated_frame
+        # shared.latest_detections.clear()
+        # shared.latest_detections.extend(detections)
+        
+        shared.latest_detections = detections
+        shared.latest_frame = frame.copy()

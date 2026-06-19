@@ -1,0 +1,63 @@
+# =====================
+# Python
+# =====================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.env
+.venv/
+venv/
+
+# =====================
+# IDE / OS
+# =====================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# =====================
+# YOLO / Ultralytics training outputs
+# =====================
+runs/
+train/
+training/
+datasets/  # ONLY if it's downloaded or huge local dataset copies
+*.cache
+
+# =====================
+# Model weights (IMPORTANT DECISION)
+# =====================
+
+# Option A (recommended for now): ignore large trained weights
+*.pt
+*.pth
+
+# BUT if you want to keep specific models in repo:
+# !app/models/yolo11n.pt
+# !app/models/bolt_model.pt
+
+# =====================
+# Logs / outputs
+# =====================
+logs/
+*.log
+
+# =====================
+# FastAPI / runtime artifacts
+# =====================
+*.db
+*.sqlite3
+
+# =====================
+# Temporary uploads (if you use them later)
+# =====================
+uploads/
+static/uploads/
+
+# =====================
+# Jupyter (if you used notebooks for training)
+# =====================
+.ipynb_checkpoints/

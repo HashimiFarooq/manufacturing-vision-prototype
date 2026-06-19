@@ -2,10 +2,10 @@ from ultralytics import YOLO
 import cv2
 
 # Load model
-model = YOLO("yolo11n.pt")
+model = YOLO("../models/yolo11n_v3.pt")
 
 # Run inference
-results = model("static/people.jpg")
+results = model("../static/nails_and_screws.jpg")
 
 # Get annotated image (with boxes drawn)
 annotated_frame = results[0].plot()
