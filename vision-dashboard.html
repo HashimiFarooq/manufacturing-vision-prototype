@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bolt Check — Live Vision</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #F0F2F8;
+      --bg-card:      #FFFFFF;
+      --bg-card2:     #F7F8FC;
+      --bg-soft:      #EEF0F8;
+      --border:       rgba(0,0,0,0.07);
+      --border2:      rgba(0,0,0,0.12);
+      --shadow-sm:    0 1px 4px rgba(60,70,120,0.07);
+      --shadow-md:    0 4px 18px rgba(60,70,120,0.10);
+      --shadow-lg:    0 8px 32px rgba(60,70,120,0.14);
+
+      --text:         #1A1D35;
+      --text-muted:   #5A6080;
+      --text-faint:   #9CA3C0;
+
+      /* Brand accent */
+      --indigo:       #4F6EF7;
+      --indigo-bg:    rgba(79,110,247,0.10);
+      --indigo-border:rgba(79,110,247,0.22);
+
+      /* Status colours */
+      --coral:        #F05545;
+      --coral-bg:     rgba(240,85,69,0.10);
+      --coral-border: rgba(240,85,69,0.22);
+
+      --teal:         #0DB88A;
+      --teal-bg:      rgba(13,184,138,0.10);
+      --teal-border:  rgba(13,184,138,0.22);
+
+      --amber:        #F59E0B;
+      --amber-bg:     rgba(245,158,11,0.10);
+      --amber-border: rgba(245,158,11,0.22);
+
+      --sky:          #2BA4DC;
+      --sky-bg:       rgba(43,164,220,0.10);
+      --sky-border:   rgba(43,164,220,0.22);
+
+      --violet:       #7C5CFC;
+      --violet-bg:    rgba(124,92,252,0.10);
+      --violet-border:rgba(124,92,252,0.22);
+
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Plus Jakarta Sans', sans-serif;
+      --r-sm:  10px;
+      --r-md:  16px;
+      --r-lg:  22px;
+      --r-xl:  28px;
+      --r-pill:999px;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .page { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ═══════════════════════════════
+       HEADER
+    ═══════════════════════════════ */
+    header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border2);
+      padding: 0 28px;
+      height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+      box-shadow: var(--shadow-sm);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 38px; height: 38px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--indigo), #7B93FF);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px rgba(79,110,247,0.35);
+      flex-shrink: 0;
+    }
+    .brand-name { font-size: 17px; font-weight: 800; letter-spacing: -0.4px; color: var(--text); }
+    .brand-sub  { font-size: 11.5px; color: var(--text-faint); margin-top: 1px; }
+
+    .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .url-field {
+      display: flex; align-items: center;
+      background: var(--bg-soft); border: 1.5px solid var(--border2);
+      border-radius: var(--r-pill); overflow: hidden; height: 38px;
+    }
+    .url-field label {
+      padding: 0 11px; font-size: 10.5px; font-family: var(--mono);
+      color: var(--text-faint); border-right: 1px solid var(--border2);
+      height: 100%; display: flex; align-items: center; white-space: nowrap;
+      background: var(--bg-card);
+    }
+    #api-url {
+      font-family: var(--mono); font-size: 12px; padding: 0 10px;
+      border: none; background: transparent; color: var(--text); outline: none; width: 148px;
+    }
+
+    .btn {
+      font-family: var(--sans); font-size: 13px; font-weight: 700;
+      padding: 0 18px; height: 38px; border-radius: var(--r-pill);
+      border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+      transition: all 0.14s ease; white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: var(--indigo); color: #fff;
+      box-shadow: 0 4px 14px rgba(79,110,247,0.30);
+    }
+    .btn-primary:hover { background: #3D5CE8; box-shadow: 0 6px 18px rgba(79,110,247,0.38); }
+    .btn-danger {
+      background: var(--coral); color: #fff;
+      box-shadow: 0 4px 14px rgba(240,85,69,0.28);
+    }
+    .btn-danger:hover { background: #D94030; }
+    .btn-ghost {
+      background: var(--bg-card); color: var(--text-muted);
+      border: 1.5px solid var(--border2);
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-ghost:hover { background: var(--bg-soft); color: var(--text); }
+    .btn-sm { height: 30px; font-size: 11.5px; padding: 0 13px; }
+    .btn-pause {
+      background: var(--bg-soft); color: var(--text-muted);
+      border: 1.5px solid var(--border2);
+    }
+    .btn-pause:hover { background: var(--bg-card); }
+
+    .status-chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 14px; border-radius: var(--r-pill);
+      font-weight: 700; font-size: 12px;
+    }
+    .chip-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+    .chip-offline { background: var(--coral-bg); color: var(--coral); border: 1px solid var(--coral-border); }
+    .chip-live    { background: var(--teal-bg);  color: var(--teal);  border: 1px solid var(--teal-border); }
+    .chip-live .chip-dot { animation: livepulse 1.8s infinite; }
+    @keyframes livepulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+    /* ═══════════════════════════════
+       LAYOUT
+    ═══════════════════════════════ */
+    .grid {
+      flex: 1;
+      padding: 22px 28px 32px;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      grid-template-rows: auto auto auto auto;
+      gap: 18px;
+      align-items: start;
+    }
+
+    /* ═══════════════════════════════
+       BANNER
+    ═══════════════════════════════ */
+    .banner {
+      grid-column: 1 / -1;
+      background: var(--bg-card);
+      border-radius: var(--r-xl);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      padding: 20px 26px;
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }
+    .banner-icon {
+      width: 52px; height: 52px; border-radius: 16px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .banner-icon-ok   { background: var(--teal-bg);   color: var(--teal); }
+    .banner-icon-warn { background: var(--amber-bg);  color: var(--amber); }
+    .banner-icon-idle { background: var(--indigo-bg); color: var(--indigo); }
+
+    .banner-copy h2 { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+    .banner-copy p  { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
+
+    .banner-kpis { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+    .kpi-chip {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 10px 20px; border-radius: var(--r-lg);
+      background: var(--bg-soft); border: 1px solid var(--border);
+      min-width: 90px;
+    }
+    .kpi-num { font-size: 24px; font-weight: 800; font-family: var(--mono); letter-spacing: -1px; color: var(--text); }
+    .kpi-lbl { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
+
+    /* ═══════════════════════════════
+       CARDS
+    ═══════════════════════════════ */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+    .card-head {
+      padding: 16px 22px 0;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      margin-bottom: 14px;
+    }
+    .card-head h3 {
+      font-size: 14.5px; font-weight: 700; display: flex; align-items: center; gap: 9px;
+    }
+    .icon-pill {
+      width: 30px; height: 30px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .ip-indigo { background: var(--indigo-bg); color: var(--indigo); }
+    .ip-teal   { background: var(--teal-bg);   color: var(--teal); }
+    .ip-coral  { background: var(--coral-bg);  color: var(--coral); }
+    .ip-sky    { background: var(--sky-bg);    color: var(--sky); }
+    .ip-violet { background: var(--violet-bg); color: var(--violet); }
+    .ip-amber  { background: var(--amber-bg);  color: var(--amber); }
+    .card-tag {
+      font-family: var(--mono); font-size: 10.5px; color: var(--text-faint);
+      background: var(--bg-soft); padding: 3px 10px; border-radius: var(--r-pill);
+      border: 1px solid var(--border2);
+    }
+
+    /* ═══════════════════════════════
+       CAMERA FEED
+    ═══════════════════════════════ */
+    .feed-outer { padding: 0 18px 18px; }
+    .feed-area {
+      aspect-ratio: 16/10; border-radius: var(--r-lg); overflow: hidden;
+      background: #1A1D35; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--border2);
+      box-shadow: inset 0 2px 12px rgba(0,0,0,0.18);
+    }
+    .scan-line {
+      position: absolute; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--indigo) 50%, transparent 100%);
+      opacity: 0.7; animation: scan 3.5s linear infinite; pointer-events: none;
+    }
+    @keyframes scan { from{top:0} to{top:100%} }
+    .corner { position: absolute; width: 20px; height: 20px; border-style: solid; border-radius: 3px; }
+    .corner { border-color: rgba(255,255,255,0.25); }
+    .c-tl { top:10px; left:10px;  border-width: 2px 0 0 2px; }
+    .c-tr { top:10px; right:10px; border-width: 2px 2px 0 0; }
+    .c-bl { bottom:10px; left:10px;  border-width: 0 0 2px 2px; }
+    .c-br { bottom:10px; right:10px; border-width: 0 2px 2px 0; }
+
+    .feed-ph { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .feed-ph-icon {
+      width: 60px; height: 60px; border-radius: 18px;
+      background: rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.25);
+    }
+    .feed-ph-title { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.5); }
+    .feed-ph-sub   { font-size: 11.5px; font-family: var(--mono); color: rgba(255,255,255,0.22); }
+    #feed-img { display:none; width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; }
+    #svg-overlay { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+
+    /* ═══════════════════════════════
+       STAT STRIP (3 tiles)
+    ═══════════════════════════════ */
+    .stat-strip {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 10px; padding: 0 18px 18px;
+    }
+    .stat-tile {
+      border-radius: var(--r-md); padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 3px;
+      border: 1.5px solid transparent;
+    }
+    .st-indigo { background: var(--indigo-bg); border-color: var(--indigo-border); }
+    .st-teal   { background: var(--teal-bg);   border-color: var(--teal-border); }
+    .st-sky    { background: var(--sky-bg);     border-color: var(--sky-border); }
+
+    .tile-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; display: flex; align-items: center; gap: 5px; }
+    .st-indigo .tile-lbl { color: var(--indigo); }
+    .st-teal   .tile-lbl { color: var(--teal); }
+    .st-sky    .tile-lbl { color: var(--sky); }
+    .tile-val  { font-size: 28px; font-weight: 800; font-family: var(--mono); letter-spacing: -1.5px; color: var(--text); }
+    .tile-sub  { font-size: 11px; color: var(--text-muted); }
+
+    .tip-wrap { position:relative; display:inline-flex; align-items:center; cursor:help; }
+    .tip-box  {
+      display:none; position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+      background: var(--bg-card); border:1.5px solid var(--border2); border-radius:14px;
+      padding:10px 13px; width:210px; font-size:12px; color:var(--text-muted); line-height:1.6;
+      z-index:50; white-space:normal; font-weight:400; font-family:var(--sans);
+      box-shadow: var(--shadow-lg);
+    }
+    .tip-wrap:hover .tip-box { display:block; }
+
+    /* ═══════════════════════════════
+       DETECTIONS
+    ═══════════════════════════════ */
+    .det-list { padding: 0 18px 18px; display:flex; flex-direction:column; gap:8px; }
+    .det-row {
+      display:flex; align-items:center; gap:12px;
+      background: var(--bg-soft); border-radius: var(--r-pill);
+      padding: 10px 14px; border: 1px solid var(--border);
+      transition: box-shadow 0.15s;
+    }
+    .det-row:hover { box-shadow: var(--shadow-md); }
+    .det-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 800; font-size: 13px; flex-shrink:0;
+    }
+    .da-bolt     { background: var(--coral-bg);  color: var(--coral); }
+    .da-socket   { background: var(--sky-bg);    color: var(--sky); }
+    .da-component{ background: var(--violet-bg); color: var(--violet); }
+    .da-default  { background: var(--bg-soft);   color: var(--text-muted); }
+    .det-name { font-weight: 700; font-size: 13.5px; text-transform: capitalize; flex:1; }
+    .det-score-wrap { display:flex; align-items:center; gap:8px; }
+    .score-track { width:52px; height:6px; border-radius:999px; background:var(--border2); overflow:hidden; }
+    .score-bar   { height:100%; border-radius:999px; }
+    .score-pct { font-family:var(--mono); font-weight:700; font-size:13px; min-width:36px; text-align:right; }
+    .det-coord { font-family:var(--mono); font-size:10.5px; color:var(--text-faint); min-width:74px; text-align:right; }
+    .empty-state {
+      display:flex; flex-direction:column; align-items:center; gap:10px;
+      padding:28px 16px; text-align:center; color:var(--text-faint); font-size:13px;
+    }
+    .empty-state svg { opacity:0.35; }
+
+    /* ═══════════════════════════════
+       RIGHT COLUMN
+    ═══════════════════════════════ */
+    .right-col { display:flex; flex-direction:column; gap:18px; }
+
+    /* Arm card */
+    .arm-rows { padding: 0 18px 18px; display:flex; flex-direction:column; gap:8px; }
+    .arm-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding: 10px 14px; background:var(--bg-soft);
+      border-radius: var(--r-md); border:1px solid var(--border);
+    }
+    .arm-key { font-size:12px; color:var(--text-muted); font-weight:500; }
+    .arm-val { font-family:var(--mono); font-size:12px; font-weight:600; color:var(--text); text-align:right; }
+
+    .status-badge { font-weight:700; font-size:12px; padding:4px 12px; border-radius:var(--r-pill); }
+    .sb-idle     { background:var(--bg-soft);  color:var(--text-muted); border:1px solid var(--border2); }
+    .sb-moving   { background:var(--amber-bg); color:var(--amber); border:1px solid var(--amber-border); }
+    .sb-complete { background:var(--teal-bg);  color:var(--teal);  border:1px solid var(--teal-border); }
+    .sb-error    { background:var(--coral-bg); color:var(--coral); border:1px solid var(--coral-border); }
+
+    .progress-block { padding:0 18px 18px; }
+    .progress-label { display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); font-weight:600; margin-bottom:8px; }
+    .progress-track { height:10px; background:var(--bg-soft); border-radius:999px; overflow:hidden; border:1px solid var(--border); }
+    .progress-fill { height:100%; border-radius:999px; background:linear-gradient(90deg, var(--teal), #5CF0C8); transition:width 0.4s ease; box-shadow:0 2px 8px rgba(13,184,138,0.3); }
+
+    /* ═══════════════════════════════
+       ACTIVITY LOG
+    ═══════════════════════════════ */
+    .activity-feed { padding:0 18px 18px; max-height:130px; overflow-y:auto; display:flex; flex-direction:column; gap:2px; }
+    .act-row { display:flex; align-items:flex-start; gap:10px; padding:6px 0; border-bottom:1px solid var(--border); }
+    .act-row:last-child { border-bottom:none; }
+    .act-dot { width:7px; height:7px; border-radius:50%; background:var(--indigo-bg); border:2px solid var(--indigo); margin-top:5px; flex-shrink:0; }
+    .act-time { font-family:var(--mono); font-size:10.5px; color:var(--text-faint); white-space:nowrap; padding-top:1px; }
+    .act-msg  { font-size:12px; color:var(--text-muted); line-height:1.5; }
+
+    /* ═══════════════════════════════
+       SCAN HISTORY
+    ═══════════════════════════════ */
+    .history-body { padding:0 18px 18px; }
+    .history-scroll { max-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:7px; }
+    .history-row {
+      display:flex; align-items:center; gap:10px;
+      padding: 9px 14px; background:var(--bg-soft);
+      border-radius: var(--r-pill); border:1px solid var(--border);
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:none} }
+    .hist-time  { font-family:var(--mono); font-size:10.5px; color:var(--text-faint); width:50px; flex-shrink:0; }
+    .hist-badge { font-weight:700; font-size:11px; padding:3px 11px; border-radius:var(--r-pill); text-transform:capitalize; flex-shrink:0; }
+    .hist-coord { font-family:var(--mono); font-size:10.5px; color:var(--text-faint); }
+    .hist-score { font-family:var(--mono); font-weight:700; font-size:12.5px; margin-left:auto; }
+
+    .history-footer {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 18px; border-top:1px solid var(--border);
+      font-size:11.5px; color:var(--text-faint);
+    }
+    .history-footer-actions { display:flex; gap:7px; }
+
+    /* ═══════════════════════════════
+       CONFIDENCE LEGEND
+    ═══════════════════════════════ */
+    .legend {
+      grid-column: 1 / -1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 14px 22px;
+      display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
+    }
+    .legend-title { font-size:12px; font-weight:700; color:var(--text-muted); margin-right:4px; }
+    .legend-item  { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-muted); }
+    .legend-dot   { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .legend-sep   { width:1px; height:18px; background:var(--border2); }
+    .session-timer { margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--text-faint); }
+
+    /* ═══════════════════════════════
+       SCROLLBAR
+    ═══════════════════════════════ */
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+
+    @media(max-width:960px){
+      .grid{ grid-template-columns:1fr; }
+      .banner-kpis{ margin-left:0; }
+    }
+    @media(max-width:780px){
+      .arm-bottom-grid { grid-template-columns: 1fr 1fr !important; }
+    }
+    @media(max-width:600px){
+      .stat-strip{ grid-template-columns:1fr 1fr; }
+      header{ padding:0 16px; }
+      .grid{ padding:14px 16px 24px; gap:14px; }
+      .arm-bottom-grid { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══════════ HEADER ══════════ -->
+  <header>
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">Bolt Check</div>
+        <div class="brand-sub">Live vision quality assurance</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="url-field">
+        <label for="api-url">API</label>
+        <input id="api-url" type="text" value="http://localhost:8000" spellcheck="false"/>
+      </div>
+      <button class="btn btn-primary" id="connect-btn" onclick="handleConnectClick()">
+        <svg id="connect-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <span id="connect-label">Connect</span>
+      </button>
+      <button class="btn btn-pause" id="play-btn" onclick="togglePolling()">
+        <svg id="play-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        <span id="play-label">Pause</span>
+      </button>
+      <span id="conn-pill" class="status-chip chip-offline"><span class="chip-dot"></span><span id="pill-text">Offline</span></span>
+    </div>
+  </header>
+
+  <!-- ══════════ GRID ══════════ -->
+  <div class="grid">
+
+    <!-- STATUS BANNER -->
+    <div class="banner">
+      <div class="banner-icon banner-icon-idle" id="banner-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>
+      </div>
+      <div class="banner-copy">
+        <h2 id="banner-title">Waiting to connect</h2>
+        <p id="banner-sub">Start the camera backend, enter the API address above, and click Connect</p>
+      </div>
+      <div class="banner-kpis">
+        <div class="kpi-chip">
+          <div class="kpi-num" id="banner-total">0</div>
+          <div class="kpi-lbl">Scanned</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="kpi-num" id="banner-score">—</div>
+          <div class="kpi-lbl">Avg score</div>
+        </div>
+        <div class="kpi-chip">
+          <div class="kpi-num" id="banner-session">0m 0s</div>
+          <div class="kpi-lbl">Session</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEFT COLUMN -->
+    <div style="display:flex;flex-direction:column;gap:18px;">
+
+      <!-- Camera feed -->
+      <div class="card">
+        <div class="card-head">
+          <h3>
+            <span class="icon-pill ip-indigo">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            </span>
+            Live camera
+          </h3>
+          <span class="card-tag" id="feed-meta">no signal</span>
+        </div>
+        <div class="feed-outer">
+          <div class="feed-area" id="feed-area">
+            <div class="scan-line"></div>
+            <div class="corner c-tl"></div><div class="corner c-tr"></div>
+            <div class="corner c-bl"></div><div class="corner c-br"></div>
+            <img id="feed-img" alt="Live camera feed" onerror="handleFeedError()"/>
+            <div id="feed-placeholder" class="feed-ph">
+              <div class="feed-ph-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="2" x2="22" y2="22"/><path d="M10.68 10.68a2 2 0 0 0 2.64 2.64"/><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9c0 .55.22 1.05.59 1.41"/><path d="M19.07 19.07A2 2 0 0 1 20 20v-9a2 2 0 0 0-2-2h-3L12 6"/></svg>
+              </div>
+              <div class="feed-ph-title">No camera feed</div>
+              <div class="feed-ph-sub">Connect to start streaming</div>
+            </div>
+            <div id="svg-overlay"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- What it's seeing now -->
+      <div class="card">
+        <div class="card-head">
+          <h3>
+            <span class="icon-pill ip-coral">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            What it's seeing now
+          </h3>
+          <span class="card-tag">live</span>
+        </div>
+        <div class="det-list" id="det-list">
+          <div class="empty-state">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Nothing detected yet — connect to start scanning
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+
+      <!-- Stat tiles -->
+      <div class="card">
+        <div class="card-head">
+          <h3>
+            <span class="icon-pill ip-sky">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+            </span>
+            Live stats
+          </h3>
+        </div>
+        <div class="stat-strip" style="grid-template-columns:1fr;gap:8px;">
+          <div class="stat-tile st-indigo">
+            <div class="tile-lbl">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/></svg>
+              Objects
+            </div>
+            <div class="tile-val" id="m-obj">—</div>
+            <div class="tile-sub">in this frame</div>
+          </div>
+          <div class="stat-tile st-teal">
+            <div class="tile-lbl">
+              Match score
+              <span class="tip-wrap">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span class="tip-box">How confident the system is in each detection. 95% means it's 95% sure of the label — not a measure of bolt quality or tightness.</span>
+              </span>
+            </div>
+            <div class="tile-val" id="m-score">—</div>
+            <div class="tile-sub">avg confidence</div>
+          </div>
+          <div class="stat-tile st-sky">
+            <div class="tile-lbl">Scanned</div>
+            <div class="tile-val" id="m-total">0</div>
+            <div class="tile-sub">this session</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity log -->
+      <div class="card">
+        <div class="card-head">
+          <h3>
+            <span class="icon-pill ip-amber">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            Activity
+          </h3>
+          <button class="btn btn-ghost btn-sm" onclick="clearEvt()">Clear</button>
+        </div>
+        <div class="activity-feed" id="evt-log"></div>
+      </div>
+
+      <!-- Scan history -->
+      <div class="card">
+        <div class="card-head">
+          <h3>
+            <span class="icon-pill ip-teal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            </span>
+            Scan history
+          </h3>
+          <span id="log-count" class="card-tag">0 entries</span>
+        </div>
+        <div class="history-body">
+          <div class="history-scroll" id="history-list">
+            <div class="empty-state" style="padding:18px 8px">Detections will log here automatically</div>
+          </div>
+        </div>
+        <div class="history-footer">
+          <span id="history-note">Export works even when disconnected</span>
+          <div class="history-footer-actions">
+            <button class="btn btn-ghost btn-sm" onclick="exportCSV()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export CSV
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="clearLog()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ROBOT ARM — full width, bottom -->
+    <div class="card" style="grid-column:1/-1;">
+      <div class="card-head">
+        <h3>
+          <span class="icon-pill ip-violet">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 1 5 5v3H7V7a5 5 0 0 1 5-5z"/><rect x="5" y="10" width="14" height="12" rx="2"/><line x1="9" y1="16" x2="9" y2="16"/><line x1="15" y1="16" x2="15" y2="16"/></svg>
+          </span>
+          Robot arm
+        </h3>
+        <span id="arm-status-badge" class="status-badge sb-idle">Offline</span>
+      </div>
+      <div class="arm-bottom-grid" style="display:grid;grid-template-columns:repeat(3,1fr) 1.4fr;gap:10px;padding:0 18px 18px;align-items:stretch;">
+        <div class="arm-row" style="flex-direction:column;align-items:flex-start;gap:4px;"><span class="arm-key">Current position</span><span class="arm-val" id="arm-current">—</span></div>
+        <div class="arm-row" style="flex-direction:column;align-items:flex-start;gap:4px;"><span class="arm-key">Target position</span><span class="arm-val" id="arm-target">—</span></div>
+        <div class="arm-row" style="flex-direction:column;align-items:flex-start;gap:4px;"><span class="arm-key">Last action</span><span class="arm-val" id="arm-action">—</span></div>
+        <div style="display:flex;flex-direction:column;justify-content:center;padding:10px 14px;background:var(--bg-soft);border-radius:var(--r-md);border:1px solid var(--border);">
+          <div class="progress-label"><span>Movement progress</span><span id="prog-pct">—</span></div>
+          <div class="progress-track"><div id="prog-fill" class="progress-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEGEND BAR -->
+    <div class="legend">
+      <span class="legend-title">Label colours</span>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--coral)"></span>Bolt</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--sky)"></span>Socket</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--violet)"></span>Component</div>
+      <div class="legend-sep"></div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:var(--teal)"></span>90 – 100% — High confidence
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:var(--amber)"></span>70 – 89% — Review recommended
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:var(--coral)"></span>Below 70% — Low confidence
+      </div>
+      <div class="session-timer" id="session-timer">Session: 0m 0s</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/*
+  ════════════════════════════════════════════════════
+  INTEGRATION CONTRACT — Heitan's endpoints
+
+  GET /frame
+    → MJPEG stream (multipart/x-mixed-replace)
+
+  GET /detections
+    → {
+        "detections": [
+          {
+            "label": "bolt" | "socket" | "component",
+            "confidence": 0.0–1.0,
+            "center_pixel": [x, y],
+            "bbox": [x, y, width, height]   ← optional but preferred
+          }
+        ]
+      }
+
+  GET /simulation/status
+    → {
+        "status": "idle" | "moving" | "complete" | "error",
+        "current": { "x":0.0, "y":0.0, "z":0.0 },
+        "target":  { "x":0.0, "y":0.0, "z":0.0 },
+        "last_action": "string",
+        "progress": 0.0–1.0
+      }
+
+  All coordinates in mm. Native camera resolution assumed 640×480;
+  update NATIVE_W / NATIVE_H below if different.
+  ════════════════════════════════════════════════════
+*/
+
+const CFG = { url: 'http://localhost:8000', pollMs: 1000, NATIVE_W: 640, NATIVE_H: 480 };
+const S   = { polling: true, handle: null, live: false, feedConn: false, total: 0, userDisconnected: true };
+const scanLog = [];
+const sessionStart = new Date();
+
+const LABEL_COLOR = { bolt: '#F05545', socket: '#2BA4DC', component: '#7C5CFC' };
+const DET_AVATAR  = { bolt: 'da-bolt', socket: 'da-socket', component: 'da-component' };
+
+function ts()  { return new Date().toTimeString().slice(0,8); }
+function fmtXYZ(c) { return c.x.toFixed(1)+', '+c.y.toFixed(1)+', '+c.z.toFixed(1)+' mm'; }
+
+function scoreColor(pct) {
+  if (pct >= 90) return 'var(--teal)';
+  if (pct >= 70) return 'var(--amber)';
+  return 'var(--coral)';
+}
+
+/* ── Activity log ── */
+function evt(msg, type) {
+  const c = document.getElementById('evt-log');
+  const d = document.createElement('div');
+  d.className = 'act-row';
+  d.innerHTML = '<span class="act-dot"></span><span class="act-time">'+ts()+'</span><span class="act-msg">'+msg+'</span>';
+  c.insertBefore(d, c.firstChild);
+  while (c.children.length > 50) c.removeChild(c.lastChild);
+}
+function clearEvt() { document.getElementById('evt-log').innerHTML = ''; }
+
+/* ── Session timer ── */
+function updateTimer() {
+  const sec = Math.floor((new Date() - sessionStart) / 1000);
+  const m = Math.floor(sec/60), s = sec % 60;
+  const str = m+'m '+s+'s';
+  document.getElementById('session-timer').textContent = 'Session: ' + str;
+  document.getElementById('banner-session').textContent = str;
+}
+
+/* ── Connection pill + button ── */
+function setOnline(live) {
+  if (live === S.live) return;
+  S.live = live;
+  const pill = document.getElementById('conn-pill');
+  const pt   = document.getElementById('pill-text');
+  if (live) {
+    pill.className = 'status-chip chip-live'; pt.textContent = 'Live';
+    evt('Connected — camera is streaming');
+  } else {
+    pill.className = 'status-chip chip-offline'; pt.textContent = 'Offline';
+    if (!S.userDisconnected) evt('Camera backend unreachable — check server.py');
+  }
+  updateConnectButton();
+}
+
+function updateConnectButton() {
+  const btn   = document.getElementById('connect-btn');
+  const label = document.getElementById('connect-label');
+  const icon  = document.getElementById('connect-icon');
+  if (S.live && !S.userDisconnected) {
+    btn.className = 'btn btn-danger';
+    label.textContent = 'Disconnect';
+    icon.innerHTML = '<path d="M18 6L6 18M6 6l12 12"/>';
+  } else {
+    btn.className = 'btn btn-primary';
+    label.textContent = 'Connect';
+    icon.innerHTML = '<path d="M5 12h14M12 5l7 7-7 7"/>';
+  }
+}
+
+/* ── Banner ── */
+function updateBanner(dets) {
+  const t = document.getElementById('banner-title');
+  const s = document.getElementById('banner-sub');
+  const i = document.getElementById('banner-icon');
+  if (dets === null) {
+    t.textContent = 'Waiting to connect';
+    s.textContent = 'Start the camera backend, enter the API address, and click Connect';
+    i.className = 'banner-icon banner-icon-idle'; return;
+  }
+  if (!dets.length) {
+    t.textContent = 'Scanning the line';
+    s.textContent = 'Camera is live — no objects in frame right now';
+    i.className = 'banner-icon banner-icon-ok'; return;
+  }
+  t.textContent = dets.length + ' object'+(dets.length>1?'s':'')+' detected';
+  s.textContent = 'Currently tracking: ' + [...new Set(dets.map(d=>d.label))].join(', ');
+  i.className = 'banner-icon banner-icon-ok';
+}
+
+/* ── Camera feed ── */
+function setFeed(live) {
+  const img = document.getElementById('feed-img');
+  const ph  = document.getElementById('feed-placeholder');
+  if (live) {
+    if (!S.feedConn) { img.src = CFG.url + '/video'; S.feedConn = true; }
+    img.style.display = 'block'; ph.style.display = 'none';
+    document.getElementById('feed-meta').textContent = '● streaming';
+  } else {
+    S.feedConn = false; img.removeAttribute('src'); img.style.display = 'none'; ph.style.display = 'flex';
+    document.getElementById('feed-meta').textContent = 'no signal';
+  }
+}
+function handleFeedError() { if (S.feedConn) { evt('Camera stream lost'); setFeed(false); } }
+
+/* ── Overlay drawing ── */
+function drawOverlay(dets) {
+  const area = document.getElementById('feed-area');
+  const w = area.offsetWidth || 640, h = area.offsetHeight || 480;
+  const sx = w / CFG.NATIVE_W, sy = h / CFG.NATIVE_H;
+  let svg = '<svg width="'+w+'" height="'+h+'" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0">';
+  dets.forEach(d => {
+    const col = LABEL_COLOR[d.label] || '#9CA3C0';
+    const pct = Math.round(d.confidence * 100);
+    const lbl = d.label + ' ' + pct + '%';
+    const lw  = lbl.length * 6.5 + 14;
+    if (d.bbox && d.bbox.length === 4) {
+      const bx = Math.round(d.bbox[0]*sx), by = Math.round(d.bbox[1]*sy);
+      const bw = Math.round(d.bbox[2]*sx), bh = Math.round(d.bbox[3]*sy);
+      svg += '<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" fill="'+col+'18" stroke="'+col+'" stroke-width="2.5" rx="7" opacity="0.95"/>'
+           + '<rect x="'+bx+'" y="'+(by-22)+'" width="'+lw+'" height="20" rx="10" fill="'+col+'"/>'
+           + '<text x="'+(bx+8)+'" y="'+(by-8)+'" font-size="11" font-weight="700" font-family="Plus Jakarta Sans,sans-serif" fill="white">'+lbl+'</text>';
+    } else {
+      const cx = Math.round(d.center_pixel[0]*sx), cy = Math.round(d.center_pixel[1]*sy);
+      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="14" fill="'+col+'22" stroke="'+col+'" stroke-width="2.5"/>'
+           + '<circle cx="'+cx+'" cy="'+cy+'" r="3" fill="'+col+'"/>'
+           + '<rect x="'+(cx+16)+'" y="'+(cy-21)+'" width="'+lw+'" height="20" rx="10" fill="'+col+'"/>'
+           + '<text x="'+(cx+22)+'" y="'+(cy-7)+'" font-size="11" font-weight="700" font-family="Plus Jakarta Sans,sans-serif" fill="white">'+lbl+'</text>';
+    }
+  });
+  document.getElementById('svg-overlay').innerHTML = svg + '</svg>';
+}
+
+/* ── Detections list ── */
+function renderDets(dets) {
+  document.getElementById('m-obj').textContent = dets.length || '—';
+  const avgPct = dets.length ? Math.round(dets.reduce((s,d)=>s+d.confidence,0)/dets.length*100) : null;
+  const avgStr = avgPct != null ? avgPct+'%' : '—';
+  document.getElementById('m-score').textContent = avgStr;
+  document.getElementById('banner-score').textContent = avgStr;
+  updateBanner(dets);
+
+  const list = document.getElementById('det-list');
+  if (!dets.length) {
+    list.innerHTML = '<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Nothing in view right now</div>';
+    return;
+  }
+  list.innerHTML = dets.map(d => {
+    const col = LABEL_COLOR[d.label] || '#9CA3C0';
+    const pct = Math.round(d.confidence * 100);
+    const [cx, cy] = d.center_pixel;
+    const sc = scoreColor(pct);
+    return '<div class="det-row">'
+      + '<div class="det-avatar '+(DET_AVATAR[d.label]||'da-default')+'">'+d.label.charAt(0).toUpperCase()+'</div>'
+      + '<span class="det-name">'+d.label+'</span>'
+      + '<div class="det-score-wrap">'
+        + '<div class="score-track"><div class="score-bar" style="width:'+pct+'%;background:'+sc+'"></div></div>'
+        + '<span class="score-pct" style="color:'+sc+'">'+pct+'%</span>'
+      + '</div>'
+      + '<span class="det-coord">('+cx+', '+cy+')</span>'
+      + '</div>';
+  }).join('');
+}
+
+/* ── Arm status ── */
+function renderSim(s, live) {
+  const badge = document.getElementById('arm-status-badge');
+  if (!live || !s.status) {
+    badge.className = 'status-badge sb-idle'; badge.textContent = 'Offline';
+    ['arm-current','arm-target','arm-action'].forEach(id => document.getElementById(id).textContent = '—');
+    document.getElementById('prog-fill').style.width = '0%';
+    document.getElementById('prog-pct').textContent = '—';
+    return;
+  }
+  const cls = {idle:'sb-idle',moving:'sb-moving',complete:'sb-complete',error:'sb-error'}[s.status]||'sb-idle';
+  badge.className = 'status-badge '+cls; badge.textContent = s.status.charAt(0).toUpperCase()+s.status.slice(1);
+  document.getElementById('arm-current').textContent = s.current ? fmtXYZ(s.current) : '—';
+  document.getElementById('arm-target').textContent  = s.target  ? fmtXYZ(s.target)  : '—';
+  document.getElementById('arm-action').textContent  = s.last_action || '—';
+  const pct = s.progress != null ? Math.round(s.progress*100) : null;
+  document.getElementById('prog-fill').style.width = pct != null ? pct+'%' : '0%';
+  document.getElementById('prog-pct').textContent  = pct != null ? pct+'%' : '—';
+}
+
+/* ── Scan log ── */
+function addLog(dets) {
+  dets.forEach(d => {
+    const bbox = d.bbox && d.bbox.length===4 ? d.bbox : null;
+    scanLog.unshift({ time:ts(), label:d.label, score:Math.round(d.confidence*100),
+      cx:d.center_pixel[0], cy:d.center_pixel[1],
+      bw:bbox?Math.round(bbox[2]):'—', bh:bbox?Math.round(bbox[3]):'—' });
+    S.total++;
+  });
+  document.getElementById('m-total').textContent = S.total;
+  document.getElementById('banner-total').textContent = S.total;
+  document.getElementById('log-count').textContent = scanLog.length+' entr'+(scanLog.length===1?'y':'ies');
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (!scanLog.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:18px 8px">Detections will log here automatically</div>';
+    return;
+  }
+  list.innerHTML = scanLog.slice(0,300).map(e => {
+    const col = LABEL_COLOR[e.label] || '#9CA3C0';
+    const sc  = scoreColor(e.score);
+    return '<div class="history-row">'
+      + '<span class="hist-time">'+e.time+'</span>'
+      + '<span class="hist-badge" style="background:'+col+'18;color:'+col+';border:1px solid '+col+'44">'+e.label+'</span>'
+      + '<span class="hist-coord">('+e.cx+', '+e.cy+')</span>'
+      + '<span class="hist-score" style="color:'+sc+'">'+e.score+'%</span>'
+      + '</div>';
+  }).join('');
+}
+
+function clearLog() {
+  scanLog.length = 0; S.total = 0;
+  ['m-total','banner-total'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('log-count').textContent = '0 entries';
+  renderHistory(); evt('Scan history cleared');
+}
+
+function exportCSV() {
+  if (!scanLog.length) { evt('Nothing to export yet'); return; }
+  const rows = [['Time','Object','Score (%)','Center X','Center Y','BBox W','BBox H']]
+    .concat(scanLog.map(e=>[e.time,e.label,e.score,e.cx,e.cy,e.bw,e.bh]));
+  const csv = rows.map(r=>r.map(v=>{const s=String(v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(',')).join('\r\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='scan-log-'+Date.now()+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  evt('Exported '+scanLog.length+' entries to CSV');
+}
+
+/* ── Polling ── */
+let prevKey = '';
+async function poll() {
+  if (S.userDisconnected) return;
+  let dets=[], detsLive=false, taskState=null;
+  try {
+    const r = await fetch(CFG.url+'/detections',{signal:AbortSignal.timeout(2000)});
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    // Real backend nests the array as detections.objects, not a flat array
+    const payload = d.detections || {};
+    dets = Array.isArray(payload.objects) ? payload.objects : [];
+    taskState = payload.task_state || null;
+    detsLive=true;
+  } catch(e) { detsLive=false; }
+
+  setOnline(detsLive); setFeed(detsLive);
+  if (detsLive) {
+    drawOverlay(dets); renderDets(dets);
+    const key = dets.map(d=>d.label+d.center_pixel+d.confidence).join('|');
+    if (key!==prevKey && dets.length) { addLog(dets); prevKey=key; }
+  } else {
+    document.getElementById('svg-overlay').innerHTML=''; renderDets([]);
+  }
+
+  let simData={}, simLive=false;
+  try {
+    // Real backend exposes /status, not /simulation/status, and returns
+    // {camera, model, fps, task_state} rather than the arm-position shape.
+    const r = await fetch(CFG.url+'/status',{signal:AbortSignal.timeout(2000)});
+    if (!r.ok) throw 0;
+    const raw = await r.json();
+    simData = {
+      status: raw.task_state || taskState || 'idle',
+      current: null,
+      target: null,
+      last_action: raw.task_state ? ('camera: '+raw.camera+', model: '+raw.model+', fps: '+raw.fps) : null,
+      progress: null
+    };
+    simLive=true;
+  } catch(e) { simLive=false; }
+  renderSim(simData, simLive);
+}
+
+function startPoll() {
+  S.polling=true;
+  document.getElementById('play-icon').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+  document.getElementById('play-label').textContent='Pause';
+  if (!S.userDisconnected) { poll(); S.handle=setInterval(poll,CFG.pollMs); }
+}
+function stopPoll() {
+  S.polling=false; clearInterval(S.handle);
+  document.getElementById('play-icon').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+  document.getElementById('play-label').textContent='Resume';
+}
+function togglePolling() { if(S.polling){stopPoll();evt('Polling paused');}else{startPoll();evt('Polling resumed');} }
+
+function handleConnectClick() {
+  if (S.live && !S.userDisconnected) handleDisconnect(); else handleConnect();
+}
+function handleConnect() {
+  const url = document.getElementById('api-url').value.trim().replace(/\/+$/,'');
+  if (!url) return;
+  CFG.url=url; S.userDisconnected=false; S.live=false; S.feedConn=false;
+  evt('Connecting to '+url+'…');
+  clearInterval(S.handle);
+  poll().then(()=>{ if(S.polling) S.handle=setInterval(poll,CFG.pollMs); });
+  updateConnectButton();
+}
+function handleDisconnect() {
+  S.userDisconnected=true; S.live=false; S.feedConn=false;
+  clearInterval(S.handle);
+  document.getElementById('conn-pill').className='status-chip chip-offline';
+  document.getElementById('pill-text').textContent='Offline';
+  setFeed(false); renderDets([]); renderSim({},false); updateBanner(null);
+  document.getElementById('svg-overlay').innerHTML='';
+  updateConnectButton();
+  evt('Disconnected — scan history and CSV export still available');
+}
+
+/* ── Init ── */
+evt('Dashboard ready — click Connect to begin');
+updateConnectButton();
+setInterval(updateTimer, 1000);
+</script>
+</body>
+</html>
